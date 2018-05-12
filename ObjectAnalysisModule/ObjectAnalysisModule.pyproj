@@ -89,6 +89,8 @@
     <Content Include="data\scream.jpg" />
     <Content Include="data\voc.data" />
     <Content Include="data\voc.names" />
+    <Content Include="pthreadGC2.dll" />
+    <Content Include="pthreadVC2.dll" />
     <Content Include="yolov3.weights" />
     <Content Include="yolo_cpp_dll.dll" />
   </ItemGroup>

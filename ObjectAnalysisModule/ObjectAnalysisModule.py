@@ -25,9 +25,7 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-dirname = os.path.dirname(__file__)
-libpath = os.path.join(dirname, 'yolo_cpp_dll.dll')
-lib = CDLL(libpath)
+lib = CDLL('yolo_cpp_dll.dll')
 
 ########## 형식 설정 ##########
 lib.network_width.argtypes = [c_void_p]
