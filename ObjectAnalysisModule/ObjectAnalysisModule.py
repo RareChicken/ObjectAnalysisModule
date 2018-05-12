@@ -2,13 +2,13 @@ from ctypes import *
 import os
 
 class BOX(Structure):
-    fields = [("x", c_float),
+    _fields_ = [("x", c_float),
                 ("y", c_float),
                 ("w", c_float),
                 ("h", c_float)]
 
 class DETECTION(Structure):
-    fields = [("bbox", BOX),
+    _fields_ = [("bbox", BOX),
                 ("classes", c_int),
                 ("prob", POINTER(c_float)),
                 ("mask", POINTER(c_float)),
@@ -16,16 +16,16 @@ class DETECTION(Structure):
                 ("sort_class", c_int)]
 
 class IMAGE(Structure):
-    fields = [("w", c_int),
+    _fields_ = [("w", c_int),
                 ("h", c_int),
                 ("c", c_int),
                 ("data", POINTER(c_float))]
 
 class METADATA(Structure):
-    fields = [("classes", c_int),
+    _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-dirname = os.path.dirname(_file_)
+dirname = os.path.dirname(__file__)
 libpath = os.path.join(dirname, 'yolo_cpp_dll.dll')
 lib = CDLL(libpath)
 
@@ -175,7 +175,7 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
         Compute (and show) bounding boxes. Changes return.
 
     makeImageOnly: bool (default= False)
-        If showImage is True, this won't actually show the image, but will create the array and return it.
+        If showImage is True, this won't actually *show* the image, but will create the array and return it.
 
     initOnly: bool (default= False)
         Only initialize globals. Don't actually run a prediction.
@@ -199,11 +199,11 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
     global metaMain, netMain, altNames #pylint: disable=W0603
     assert 0 < thresh < 1, "Threshold should be a float between zero and one (non-inclusive)"
     if not os.path.exists(configPath):
-        raise ValueError("Invalid config path "+os.path.abspath(configPath)+"")
+        raise ValueError("Invalid config path `"+os.path.abspath(configPath)+"`")
     if not os.path.exists(weightPath):
-        raise ValueError("Invalid weight path "+os.path.abspath(weightPath)+"")
+        raise ValueError("Invalid weight path `"+os.path.abspath(weightPath)+"`")
     if not os.path.exists(metaPath):
-        raise ValueError("Invalid data file path "+os.path.abspath(metaPath)+"")
+        raise ValueError("Invalid data file path `"+os.path.abspath(metaPath)+"`")
     if netMain is None:
         netMain = load_net(configPath.encode("ascii"), weightPath.encode("ascii"), 0)
     if metaMain is None:
@@ -215,7 +215,7 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
             with open(metaPath) as metaFH:
                 metaContents = metaFH.read()
                 import re
-                match = re.search("names = *(.)$", metaContents, re.IGNORECASE | re.MULTILINE)
+                match = re.search("names *= *(.*)$", metaContents, re.IGNORECASE | re.MULTILINE)
                 if match:
                     result = match.group(1)
                 else:
@@ -233,7 +233,7 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
         print("Initialized detector")
         return None
     if not os.path.exists(imagePath):
-        raise ValueError("Invalid image path "+os.path.abspath(imagePath)+"")
+        raise ValueError("Invalid image path `"+os.path.abspath(imagePath)+"`")
     # Do the detection
     detections = detect(netMain, metaMain, imagePath.encode("ascii"), thresh)
     if showImage:
@@ -241,7 +241,7 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
             from skimage import io, draw
             import numpy as np
             image = io.imread(imagePath)
-            print("* "+str(len(detections))+" Results, color coded by confidence *")
+            print("*** "+str(len(detections))+" Results, color coded by confidence ***")
             imcaption = []
             for detection in detections:
                 label = detection[0]
@@ -272,7 +272,7 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
                 rr3, cc3 = draw.polygon_perimeter([x[1] - 1 for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
                 rr4, cc4 = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] + 1 for x in boundingBox], shape= shape)
                 rr5, cc5 = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] - 1 for x in boundingBox], shape= shape)
-                boxColor = (int(255 * (1 - (confidence * 2))), int(255 * (confidence * 2)), 0)
+                boxColor = (int(255 * (1 - (confidence ** 2))), int(255 * (confidence ** 2)), 0)
                 draw.set_color(image, (rr, cc), boxColor, alpha= 0.8)
                 draw.set_color(image, (rr2, cc2), boxColor, alpha= 0.8)
                 draw.set_color(image, (rr3, cc3), boxColor, alpha= 0.8)
@@ -290,5 +290,5 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
             print("Unable to show image: "+str(e))
     return detections
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     print(performDetect())
