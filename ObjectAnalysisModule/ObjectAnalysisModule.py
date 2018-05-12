@@ -25,9 +25,14 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-lib = CDLL('yolo_cpp_dll.dll')
+hasGPU = False
+lib = CDLL('yolo_cpp_dll.dll', RTLD_GLOBAL)
 
 ########## 형식 설정 ##########
+if hasGPU:
+    set_gpu = lib.cuda_set_device
+    set_gpu.argtypes = [c_int]
+
 lib.network_width.argtypes = [c_void_p]
 lib.network_width.restype = c_int
 lib.network_height.argtypes = [c_void_p]
