@@ -25,225 +25,240 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
-hasGPU = False
-lib = CDLL('yolo_cpp_dll.dll', RTLD_GLOBAL)
+class ObjectAnalyzer(object):
+    def __init__(self, dllName, isGPUDLL, imagePath,
+                 thresh= 0.25, configPath= "./cfg/yolov3.cfg",
+                 weightPath= "yolov3.weights", metaPath= "./data/coco.data",
+                 initOnly= False, netMain= None, metaMain= None, altNames= None):
+        """
+        Parameters
+        ----------------
+        imagePath: str
+            Path to the image to evaluate. Raises ValueError if not found
 
-########## 형식 설정 ##########
-if hasGPU:
-    set_gpu = lib.cuda_set_device
-    set_gpu.argtypes = [c_int]
+        thresh: float (default= 0.25)
+            The detection threshold
 
-lib.network_width.argtypes = [c_void_p]
-lib.network_width.restype = c_int
-lib.network_height.argtypes = [c_void_p]
-lib.network_height.restype = c_int
+        configPath: str
+            Path to the configuration file. Raises ValueError if not found
 
-predict = lib.network_predict
-predict.argtypes = [c_void_p, POINTER(c_float)]
-predict.restype = POINTER(c_float)
+        weightPath: str
+            Path to the weights file. Raises ValueError if not found
 
-make_image = lib.make_image
-make_image.argtypes = [c_int, c_int, c_int]
-make_image.restype = IMAGE
+        metaPath: str
+            Path to the data file. Raises ValueError if not found
 
-get_network_boxes = lib.get_network_boxes
-get_network_boxes.argtypes = [c_void_p, c_int, c_int, c_float, c_float, POINTER(c_int), c_int, POINTER(c_int), c_int]
-get_network_boxes.restype = POINTER(DETECTION)
+        showImage: bool (default= True)
+            Compute (and show) bounding boxes. Changes return.
 
-make_network_boxes = lib.make_network_boxes
-make_network_boxes.argtypes = [c_void_p]
-make_network_boxes.restype = POINTER(DETECTION)
+        makeImageOnly: bool (default= False)
+            If showImage is True, this won't actually *show* the image, but will create the array and return it.
 
-free_detections = lib.free_detections
-free_detections.argtypes = [POINTER(DETECTION), c_int]
+        initOnly: bool (default= False)
+            Only initialize globals. Don't actually run a prediction.
+        """
 
-free_ptrs = lib.free_ptrs
-free_ptrs.argtypes = [POINTER(c_void_p), c_int]
+        self.imagePath = imagePath
+        self.thresh = thresh
+        self.configPath = configPath
+        self.weightPath = weightPath
+        self.metaPath = metaPath
+        self.initOnly = initOnly
+        self.netMain = netMain
+        self.metaMain = metaMain
+        self.altNames = altNames
 
-network_predict = lib.network_predict
-network_predict.argtypes = [c_void_p, POINTER(c_float)]
+        lib = CDLL(dllName, RTLD_GLOBAL)
+        ########## dll 함수 형식 설정 ##########
+        if isGPUDLL:
+            set_gpu = lib.cuda_set_device
+            set_gpu.argtypes = [c_int]
 
-reset_rnn = lib.reset_rnn
-reset_rnn.argtypes = [c_void_p]
+        lib.network_width.argtypes = [c_void_p]
+        lib.network_width.restype = c_int
+        lib.network_height.argtypes = [c_void_p]
+        lib.network_height.restype = c_int
 
-load_net = lib.load_network
-load_net.argtypes = [c_char_p, c_char_p, c_int]
-load_net.restype = c_void_p
+        self.predict = lib.network_predict
+        self.predict.argtypes = [c_void_p, POINTER(c_float)]
+        self.predict.restype = POINTER(c_float)
 
-do_nms_obj = lib.do_nms_obj
-do_nms_obj.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
+        self.make_image = lib.make_image
+        self.make_image.argtypes = [c_int, c_int, c_int]
+        self.make_image.restype = IMAGE
 
-do_nms_sort = lib.do_nms_sort
-do_nms_sort.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
+        self.get_network_boxes = lib.get_network_boxes
+        self.get_network_boxes.argtypes = [c_void_p, c_int, c_int, c_float, c_float, POINTER(c_int), c_int, POINTER(c_int), c_int]
+        self.get_network_boxes.restype = POINTER(DETECTION)
 
-free_image = lib.free_image
-free_image.argtypes = [IMAGE]
+        self.make_network_boxes = lib.make_network_boxes
+        self.make_network_boxes.argtypes = [c_void_p]
+        self.make_network_boxes.restype = POINTER(DETECTION)
 
-letterbox_image = lib.letterbox_image
-letterbox_image.argtypes = [IMAGE, c_int, c_int]
-letterbox_image.restype = IMAGE
+        self.free_detections = lib.free_detections
+        self.free_detections.argtypes = [POINTER(DETECTION), c_int]
 
-load_meta = lib.get_metadata
-lib.get_metadata.argtypes = [c_char_p]
-lib.get_metadata.restype = METADATA
+        self.free_ptrs = lib.free_ptrs
+        self.free_ptrs.argtypes = [POINTER(c_void_p), c_int]
 
-load_image = lib.load_image_color
-load_image.argtypes = [c_char_p, c_int, c_int]
-load_image.restype = IMAGE
+        self.network_predict = lib.network_predict
+        self.network_predict.argtypes = [c_void_p, POINTER(c_float)]
 
-rgbgr_image = lib.rgbgr_image
-rgbgr_image.argtypes = [IMAGE]
+        self.reset_rnn = lib.reset_rnn
+        self.reset_rnn.argtypes = [c_void_p]
 
-predict_image = lib.network_predict_image
-predict_image.argtypes = [c_void_p, IMAGE]
-predict_image.restype = POINTER(c_float)
-####################
+        self.load_net = lib.load_network
+        self.load_net.argtypes = [c_char_p, c_char_p, c_int]
+        self.load_net.restype = c_void_p
 
-def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45, debug= False):
-    """
-    Performs the meat of the detection
-    """
-    #pylint: disable= C0321
-    im = load_image(image, 0, 0)
-    if debug: print("Loaded image")
-    num = c_int(0)
-    if debug: print("Assigned num")
-    pnum = pointer(num)
-    if debug: print("Assigned pnum")
-    predict_image(net, im)
-    if debug: print("did prediction")
-    dets = get_network_boxes(net, im.w, im.h, thresh, hier_thresh, None, 0, pnum, 1)
-    if debug: print("Got dets")
-    num = pnum[0]
-    if debug: print("got zeroth index of pnum")
-    if nms:
-        do_nms_sort(dets, num, meta.classes, nms)
-    if debug: print("did sort")
-    res = []
-    if debug: print("about to range")
-    for j in range(num):
-        if debug: print("Ranging on "+str(j)+" of "+str(num))
-        if debug: print("Classes: "+str(meta), meta.classes, meta.names)
-        for i in range(meta.classes):
-            if debug: print("Class-ranging on "+str(i)+" of "+str(meta.classes)+"= "+str(dets[j].prob[i]))
-            if dets[j].prob[i] > 0:
-                b = dets[j].bbox
-                if altNames is None:
-                    nameTag = meta.names[i]
-                else:
-                    nameTag = altNames[i]
-                if debug:
-                    print("Got bbox", b)
-                    print(nameTag)
-                    print(dets[j].prob[i])
-                    print((b.x, b.y, b.w, b.h))
-                res.append((nameTag, dets[j].prob[i], (b.x, b.y, b.w, b.h)))
-    if debug: print("did range")
-    res = sorted(res, key=lambda x: -x[1])
-    if debug: print("did sort")
-    free_image(im)
-    if debug: print("freed image")
-    free_detections(dets, num)
-    if debug: print("freed detections")
-    return res
+        self.do_nms_obj = lib.do_nms_obj
+        self.do_nms_obj.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
 
-netMain = None
-metaMain = None
-altNames = None
+        self.do_nms_sort = lib.do_nms_sort
+        self.do_nms_sort.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
 
-def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yolov3.cfg", weightPath = "yolov3.weights", metaPath= "./data/coco.data", showImage= True, makeImageOnly = False, initOnly= False):
-    """1
-    Convenience function to handle the detection and returns of objects.
+        self.free_image = lib.free_image
+        self.free_image.argtypes = [IMAGE]
 
-    Displaying bounding boxes requires libraries scikit-image and numpy
+        self.letterbox_image = lib.letterbox_image
+        self.letterbox_image.argtypes = [IMAGE, c_int, c_int]
+        self.letterbox_image.restype = IMAGE
 
-    Parameters
-    ----------------
-    imagePath: str
-        Path to the image to evaluate. Raises ValueError if not found
+        self.load_meta = lib.get_metadata
+        lib.get_metadata.argtypes = [c_char_p]
+        lib.get_metadata.restype = METADATA
 
-    thresh: float (default= 0.25)
-        The detection threshold
+        self.load_image = lib.load_image_color
+        self.load_image.argtypes = [c_char_p, c_int, c_int]
+        self.load_image.restype = IMAGE
 
-    configPath: str
-        Path to the configuration file. Raises ValueError if not found
+        self.rgbgr_image = lib.rgbgr_image
+        self.rgbgr_image.argtypes = [IMAGE]
 
-    weightPath: str
-        Path to the weights file. Raises ValueError if not found
+        self.predict_image = lib.network_predict_image
+        self.predict_image.argtypes = [c_void_p, IMAGE]
+        self.predict_image.restype = POINTER(c_float)
+        ####################
+        self.lib = lib
 
-    metaPath: str
-        Path to the data file. Raises ValueError if not found
+        if self.netMain is None:
+            self.netMain = self.load_net(configPath.encode("ascii"), weightPath.encode("ascii"), 0)
+        if self.metaMain is None:
+            self.metaMain = self.load_meta(metaPath.encode("ascii"))
+        if self.altNames is None:
+            # In Python 3, the metafile default access craps out on Windows (but not Linux)
+            # Read the names file and create a list to feed to detect
+            try:
+                with open(self.metaPath) as metaFH:
+                    metaContents = metaFH.read()
+                    import re
+                    match = re.search("names *= *(.*)$", metaContents, re.IGNORECASE | re.MULTILINE)
+                    if match:
+                        result = match.group(1)
+                    else:
+                        result = None
+                    try:
+                        if os.path.exists(result):
+                            with open(result) as namesFH:
+                                namesList = namesFH.read().strip().split("\n")
+                                self.altNames = [x.strip() for x in namesList]
+                    except TypeError:
+                        pass
+            except Exception:
+                pass
 
-    showImage: bool (default= True)
-        Compute (and show) bounding boxes. Changes return.
+    def performDetect(self):
+        """1
+        Convenience function to handle the detection and returns of objects.
 
-    makeImageOnly: bool (default= False)
-        If showImage is True, this won't actually *show* the image, but will create the array and return it.
+        Displaying bounding boxes requires libraries scikit-image and numpy
 
-    initOnly: bool (default= False)
-        Only initialize globals. Don't actually run a prediction.
+        Returns
+        ----------------------
 
-    Returns
-    ----------------------
-
-
-    When showImage is False, list of tuples like
         ('obj_label', confidence, (bounding_box_x_px, bounding_box_y_px, bounding_box_width_px, bounding_box_height_px))
         The X and Y coordinates are from the center of the bounding box. Subtract half the width or height to get the lower corner.
+        """
+        assert 0 < self.thresh < 1, "Threshold should be a float between zero and one (non-inclusive)"
+        if not os.path.exists(self.configPath):
+            raise ValueError("Invalid config path `"+os.path.abspath(configPath)+"`")
+        if not os.path.exists(self.weightPath):
+            raise ValueError("Invalid weight path `"+os.path.abspath(weightPath)+"`")
+        if not os.path.exists(self.metaPath):
+            raise ValueError("Invalid data file path `"+os.path.abspath(metaPath)+"`")
+        if self.initOnly:
+            print("Initialized detector")
+            return None
+        if not os.path.exists(self.imagePath):
+            raise ValueError("Invalid image path `"+os.path.abspath(self.imagePath)+"`")
+        # Do the detection
+        detections = self._detect()
+        return detections
 
-    Otherwise, a dict with
+    def _detect(self, hier_thresh=.5, nms=.45, debug= False):
+        """
+        Performs the meat of the detection
+        """
+        #pylint: disable= C0321
+        im = self.load_image(self.imagePath.encode('ascii'), 0, 0)
+        if debug: print("Loaded image")
+        num = c_int(0)
+        if debug: print("Assigned num")
+        pnum = pointer(num)
+        if debug: print("Assigned pnum")
+        self.predict_image(self.netMain, im)
+        if debug: print("did prediction")
+        dets = self.get_network_boxes(self.netMain, im.w, im.h, self.thresh, hier_thresh, None, 0, pnum, 1)
+        if debug: print("Got dets")
+        num = pnum[0]
+        if debug: print("got zeroth index of pnum")
+        if nms:
+            self.do_nms_sort(dets, num, self.metaMain.classes, nms)
+        if debug: print("did sort")
+        res = []
+        if debug: print("about to range")
+        for j in range(num):
+            if debug: print("Ranging on "+str(j)+" of "+str(num))
+            if debug: print("Classes: "+str(self.metaMain), self.metaMain.classes, self.metaMain.names)
+            for i in range(self.metaMain.classes):
+                if debug: print("Class-ranging on "+str(i)+" of "+str(self.metaMain.classes)+"= "+str(dets[j].prob[i]))
+                if dets[j].prob[i] > 0:
+                    b = dets[j].bbox
+                    if self.altNames is None:
+                        nameTag = self.metaMain.names[i]
+                    else:
+                        nameTag = self.altNames[i]
+                    if debug:
+                        print("Got bbox", b)
+                        print(nameTag)
+                        print(dets[j].prob[i])
+                        print((b.x, b.y, b.w, b.h))
+                    res.append((nameTag, dets[j].prob[i], (b.x, b.y, b.w, b.h)))
+        if debug: print("did range")
+        res = sorted(res, key=lambda x: -x[1])
+        if debug: print("did sort")
+        self.free_image(im)
+        if debug: print("freed image")
+        self.free_detections(dets, num)
+        if debug: print("freed detections")
+        return res
+
+    def _showImage(self, detections, makeImageOnly= False):
+        """
+        Returns
+        ----------------------
+
         {
             "detections": as above
             "image": a numpy array representing an image, compatible with scikit-image
             "caption": an image caption
         }
-    """
-    # Import the global variables. This lets us instance Darknet once, then just call performDetect() again without instancing again
-    global metaMain, netMain, altNames #pylint: disable=W0603
-    assert 0 < thresh < 1, "Threshold should be a float between zero and one (non-inclusive)"
-    if not os.path.exists(configPath):
-        raise ValueError("Invalid config path `"+os.path.abspath(configPath)+"`")
-    if not os.path.exists(weightPath):
-        raise ValueError("Invalid weight path `"+os.path.abspath(weightPath)+"`")
-    if not os.path.exists(metaPath):
-        raise ValueError("Invalid data file path `"+os.path.abspath(metaPath)+"`")
-    if netMain is None:
-        netMain = load_net(configPath.encode("ascii"), weightPath.encode("ascii"), 0)
-    if metaMain is None:
-        metaMain = load_meta(metaPath.encode("ascii"))
-    if altNames is None:
-        # In Python 3, the metafile default access craps out on Windows (but not Linux)
-        # Read the names file and create a list to feed to detect
-        try:
-            with open(metaPath) as metaFH:
-                metaContents = metaFH.read()
-                import re
-                match = re.search("names *= *(.*)$", metaContents, re.IGNORECASE | re.MULTILINE)
-                if match:
-                    result = match.group(1)
-                else:
-                    result = None
-                try:
-                    if os.path.exists(result):
-                        with open(result) as namesFH:
-                            namesList = namesFH.read().strip().split("\n")
-                            altNames = [x.strip() for x in namesList]
-                except TypeError:
-                    pass
-        except Exception:
-            pass
-    if initOnly:
-        print("Initialized detector")
-        return None
-    if not os.path.exists(imagePath):
-        raise ValueError("Invalid image path `"+os.path.abspath(imagePath)+"`")
-    # Do the detection
-    detections = detect(netMain, metaMain, imagePath.encode("ascii"), thresh)
-    if showImage:
+        """
+
         try:
             from skimage import io, draw
             import numpy as np
-            image = io.imread(imagePath)
+            image = io.imread(self.imagePath)
             print("*** "+str(len(detections))+" Results, color coded by confidence ***")
             imcaption = []
             for detection in detections:
@@ -289,9 +304,13 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
                 "image": image,
                 "caption": "\n<br/>".join(imcaption)
             }
+            return detections
         except Exception as e:
             print("Unable to show image: "+str(e))
-    return detections
+            return detections
 
 if __name__ == "__main__":
-    print(performDetect())
+    objectAnalyzer = ObjectAnalyzer('yolo_cpp_dll.dll', False, './data/dog.jpg')
+
+    detections = objectAnalyzer.performDetect()
+    print(detections)
