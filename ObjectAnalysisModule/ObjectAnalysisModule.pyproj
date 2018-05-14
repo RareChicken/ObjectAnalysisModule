@@ -4,13 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b647b55f-74b0-4993-be16-e5722424e5fb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>ObjectAnalysisModule.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>ObjectAnalysisModule</Name>
     <RootNamespace>ObjectAnalysisModule</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,9 +21,6 @@
     <DebugSymbols>true</DebugSymbols>
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="ObjectAnalysisModule.py" />
-  </ItemGroup>
   <ItemGroup>
     <Content Include="cfg\alexnet.cfg" />
     <Content Include="cfg\cifar.cfg" />
@@ -92,11 +90,17 @@
     <Content Include="pthreadGC2.dll" />
     <Content Include="pthreadVC2.dll" />
     <Content Include="yolov3.weights" />
-    <Content Include="yolo_cpp_dll.dll" />
+    <Content Include="yolo_cpp_dll_no_gpu.dll" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="cfg\" />
     <Folder Include="data\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="main.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="objanalyzer.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

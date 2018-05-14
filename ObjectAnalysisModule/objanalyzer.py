@@ -167,7 +167,7 @@ class ObjectAnalyzer(object):
             except Exception:
                 pass
 
-    def performDetect(self):
+    def perform_detect(self):
         """1
         Convenience function to handle the detection and returns of objects.
 
@@ -243,9 +243,9 @@ class ObjectAnalyzer(object):
         if debug: print("freed detections")
         return res
 
-    def _showImage(self, detections, makeImageOnly= False):
+    def show_image(self, detections, makeImageOnly= False):
         """
-        Returns
+        Return
         ----------------------
 
         {
@@ -309,8 +309,8 @@ class ObjectAnalyzer(object):
             print("Unable to show image: "+str(e))
             return detections
 
-if __name__ == "__main__":
-    objectAnalyzer = ObjectAnalyzer('yolo_cpp_dll.dll', False, './data/dog.jpg')
+    def set_dll_name(self, dllName):
+        self.dllName = dllName
 
-    detections = objectAnalyzer.performDetect()
-    print(detections)
+    def set_image_path(self, imagePath):
+        self.imagePath = imagePath
