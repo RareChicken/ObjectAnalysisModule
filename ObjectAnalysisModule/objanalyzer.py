@@ -122,6 +122,8 @@ class ObjectAnalyzer(object):
             raise ValueError("Invalid image path `"+os.path.abspath(self.imagePath)+"`")
         # Do the detection
         detections = self._detect()
+        self.detections = detections
+
         return detections
 
     def _detect(self, hier_thresh=.5, nms=.45, debug= False):
@@ -172,7 +174,7 @@ class ObjectAnalyzer(object):
         if debug: print("freed detections")
         return res
 
-    def show_image(self, detections, makeImageOnly= False):
+    def show_image(self, detections= self.detections, makeImageOnly= False):
         """
         Return
         ----------------------
@@ -314,3 +316,6 @@ class ObjectAnalyzer(object):
 
     def set_image_path(self, imagePath):
         self.imagePath = imagePath
+
+    def get_detections(self):
+        return self.detections
