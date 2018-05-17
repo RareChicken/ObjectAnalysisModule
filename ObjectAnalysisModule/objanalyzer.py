@@ -68,7 +68,7 @@ class ObjectAnalyzer(object):
         self.metaMain = metaMain
         self.altNames = altNames
 
-        set_dll(dllName)
+        set_dll(dllName, isGPUDLL)
 
         if self.netMain is None:
             self.netMain = self.load_net(configPath.encode("ascii"), weightPath.encode("ascii"), 0)
@@ -238,7 +238,7 @@ class ObjectAnalyzer(object):
             print("Unable to show image: "+str(e))
             return detections
 
-    def set_dll(self, dllName):
+    def set_dll(self, dllName, isGPUDLL):
         lib = CDLL(dllName, RTLD_GLOBAL)
         ########## dll 함수 형식 설정 ##########
         if isGPUDLL:
