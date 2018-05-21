@@ -174,7 +174,7 @@ class ObjectAnalyzer(object):
         if debug: print("freed detections")
         return res
 
-    def show_image(self, detections= self.detections, makeImageOnly= False):
+    def show_image(self, detections, makeImageOnly= False):
         """
         Return
         ----------------------
