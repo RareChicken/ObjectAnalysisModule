@@ -27,10 +27,10 @@ def kaze_match(im1_path, im2_path):
     cv2.waitKey(0)
 
 if __name__ == "__main__":
-    #objectAnalyzer = oa.ObjectAnalyzer('yolo_cpp_dll_no_gpu.dll', False, './data/dog.jpg')
+    objectAnalyzer = oa.ObjectAnalyzer('yolo_cpp_dll.dll', True, './data/dog.jpg')
 
-    #detections = objectAnalyzer.perform_detect()
-    #print(detections)
+    detections = objectAnalyzer.perform_detect()
+    print(detections)
 
     #objectAnalyzer.set_image_path('./data/eagle.jpg')
     #detections = objectAnalyzer.perform_detect()
@@ -40,4 +40,4 @@ if __name__ == "__main__":
     #detections = objectAnalyzer.perform_detect()
     #print(detections)
 
-    kaze_match('./data/giraffe.jpg', './data/giraffeRotate.jpg')
+    #kaze_match('./data/giraffe.jpg', './data/giraffeRotate.jpg')

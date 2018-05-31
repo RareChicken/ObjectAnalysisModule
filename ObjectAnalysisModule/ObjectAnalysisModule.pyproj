@@ -90,7 +90,12 @@
     <Content Include="pthreadGC2.dll" />
     <Content Include="pthreadVC2.dll" />
     <Content Include="yolov3.weights" />
-    <Content Include="yolo_cpp_dll_no_gpu.dll" />
+    <Content Include="yolo_cpp_dll.dll">
+      <Publish>False</Publish>
+    </Content>
+    <Content Include="yolo_cpp_dll_no_gpu.dll">
+      <Publish>False</Publish>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="cfg\" />

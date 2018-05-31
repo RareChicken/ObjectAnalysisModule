@@ -68,7 +68,78 @@ class ObjectAnalyzer(object):
         self.metaMain = metaMain
         self.altNames = altNames
 
-        set_dll(dllName, isGPUDLL)
+        lib = CDLL(dllName, RTLD_GLOBAL)
+        ########## dll 함수 형식 설정 ##########
+        if isGPUDLL:
+            set_gpu = lib.cuda_set_device
+            set_gpu.argtypes = [c_int]
+
+        lib.network_width.argtypes = [c_void_p]
+        lib.network_width.restype = c_int
+        lib.network_height.argtypes = [c_void_p]
+        lib.network_height.restype = c_int
+
+        self.predict = lib.network_predict
+        self.predict.argtypes = [c_void_p, POINTER(c_float)]
+        self.predict.restype = POINTER(c_float)
+
+        self.make_image = lib.make_image
+        self.make_image.argtypes = [c_int, c_int, c_int]
+        self.make_image.restype = IMAGE
+
+        self.get_network_boxes = lib.get_network_boxes
+        self.get_network_boxes.argtypes = [c_void_p, c_int, c_int, c_float, c_float, POINTER(c_int), c_int, POINTER(c_int), c_int]
+        self.get_network_boxes.restype = POINTER(DETECTION)
+
+        self.make_network_boxes = lib.make_network_boxes
+        self.make_network_boxes.argtypes = [c_void_p]
+        self.make_network_boxes.restype = POINTER(DETECTION)
+
+        self.free_detections = lib.free_detections
+        self.free_detections.argtypes = [POINTER(DETECTION), c_int]
+
+        self.free_ptrs = lib.free_ptrs
+        self.free_ptrs.argtypes = [POINTER(c_void_p), c_int]
+
+        self.network_predict = lib.network_predict
+        self.network_predict.argtypes = [c_void_p, POINTER(c_float)]
+
+        self.reset_rnn = lib.reset_rnn
+        self.reset_rnn.argtypes = [c_void_p]
+
+        self.load_net = lib.load_network
+        self.load_net.argtypes = [c_char_p, c_char_p, c_int]
+        self.load_net.restype = c_void_p
+
+        self.do_nms_obj = lib.do_nms_obj
+        self.do_nms_obj.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
+
+        self.do_nms_sort = lib.do_nms_sort
+        self.do_nms_sort.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
+
+        self.free_image = lib.free_image
+        self.free_image.argtypes = [IMAGE]
+
+        self.letterbox_image = lib.letterbox_image
+        self.letterbox_image.argtypes = [IMAGE, c_int, c_int]
+        self.letterbox_image.restype = IMAGE
+
+        self.load_meta = lib.get_metadata
+        lib.get_metadata.argtypes = [c_char_p]
+        lib.get_metadata.restype = METADATA
+
+        self.load_image = lib.load_image_color
+        self.load_image.argtypes = [c_char_p, c_int, c_int]
+        self.load_image.restype = IMAGE
+
+        self.rgbgr_image = lib.rgbgr_image
+        self.rgbgr_image.argtypes = [IMAGE]
+
+        self.predict_image = lib.network_predict_image
+        self.predict_image.argtypes = [c_void_p, IMAGE]
+        self.predict_image.restype = POINTER(c_float)
+        ####################
+        self.lib = lib
 
         if self.netMain is None:
             self.netMain = self.load_net(configPath.encode("ascii"), weightPath.encode("ascii"), 0)
@@ -239,80 +310,6 @@ class ObjectAnalyzer(object):
         except Exception as e:
             print("Unable to show image: "+str(e))
             return detections
-
-    def set_dll(self, dllName, isGPUDLL):
-        lib = CDLL(dllName, RTLD_GLOBAL)
-        ########## dll 함수 형식 설정 ##########
-        if isGPUDLL:
-            set_gpu = lib.cuda_set_device
-            set_gpu.argtypes = [c_int]
-
-        lib.network_width.argtypes = [c_void_p]
-        lib.network_width.restype = c_int
-        lib.network_height.argtypes = [c_void_p]
-        lib.network_height.restype = c_int
-
-        self.predict = lib.network_predict
-        self.predict.argtypes = [c_void_p, POINTER(c_float)]
-        self.predict.restype = POINTER(c_float)
-
-        self.make_image = lib.make_image
-        self.make_image.argtypes = [c_int, c_int, c_int]
-        self.make_image.restype = IMAGE
-
-        self.get_network_boxes = lib.get_network_boxes
-        self.get_network_boxes.argtypes = [c_void_p, c_int, c_int, c_float, c_float, POINTER(c_int), c_int, POINTER(c_int), c_int]
-        self.get_network_boxes.restype = POINTER(DETECTION)
-
-        self.make_network_boxes = lib.make_network_boxes
-        self.make_network_boxes.argtypes = [c_void_p]
-        self.make_network_boxes.restype = POINTER(DETECTION)
-
-        self.free_detections = lib.free_detections
-        self.free_detections.argtypes = [POINTER(DETECTION), c_int]
-
-        self.free_ptrs = lib.free_ptrs
-        self.free_ptrs.argtypes = [POINTER(c_void_p), c_int]
-
-        self.network_predict = lib.network_predict
-        self.network_predict.argtypes = [c_void_p, POINTER(c_float)]
-
-        self.reset_rnn = lib.reset_rnn
-        self.reset_rnn.argtypes = [c_void_p]
-
-        self.load_net = lib.load_network
-        self.load_net.argtypes = [c_char_p, c_char_p, c_int]
-        self.load_net.restype = c_void_p
-
-        self.do_nms_obj = lib.do_nms_obj
-        self.do_nms_obj.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
-
-        self.do_nms_sort = lib.do_nms_sort
-        self.do_nms_sort.argtypes = [POINTER(DETECTION), c_int, c_int, c_float]
-
-        self.free_image = lib.free_image
-        self.free_image.argtypes = [IMAGE]
-
-        self.letterbox_image = lib.letterbox_image
-        self.letterbox_image.argtypes = [IMAGE, c_int, c_int]
-        self.letterbox_image.restype = IMAGE
-
-        self.load_meta = lib.get_metadata
-        lib.get_metadata.argtypes = [c_char_p]
-        lib.get_metadata.restype = METADATA
-
-        self.load_image = lib.load_image_color
-        self.load_image.argtypes = [c_char_p, c_int, c_int]
-        self.load_image.restype = IMAGE
-
-        self.rgbgr_image = lib.rgbgr_image
-        self.rgbgr_image.argtypes = [IMAGE]
-
-        self.predict_image = lib.network_predict_image
-        self.predict_image.argtypes = [c_void_p, IMAGE]
-        self.predict_image.restype = POINTER(c_float)
-        ####################
-        self.lib = lib
 
     def set_image_path(self, imagePath):
         self.imagePath = imagePath
