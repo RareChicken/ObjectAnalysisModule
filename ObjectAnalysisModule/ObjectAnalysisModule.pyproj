@@ -90,7 +90,7 @@
     <Content Include="pthreadGC2.dll" />
     <Content Include="pthreadVC2.dll" />
     <Content Include="yolov3.weights" />
-    <Content Include="yolo_cpp_dll.dll">
+    <Content Include="yolo_cpp_dll_gpu.dll">
       <Publish>False</Publish>
     </Content>
     <Content Include="yolo_cpp_dll_nogpu.dll">
