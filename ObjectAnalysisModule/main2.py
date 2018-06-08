@@ -224,47 +224,27 @@ def detect(net, meta, image, isPath=True, thresh=.5, hier_thresh=.5, nms=.45, de
     #import scipy.misc
     #custom_image = scipy.misc.imread(image)
     #im, arr = array_to_image(custom_image)		# you should comment line below: free_image(im)
-    if debug: print("Loaded image")
     num = c_int(0)
-    if debug: print("Assigned num")
     pnum = pointer(num)
-    if debug: print("Assigned pnum")
     predict_image(net, im)
-    if debug: print("did prediction")
     dets = get_network_boxes(net, im.w, im.h, thresh, hier_thresh, None, 0, pnum, 0)
-    if debug: print("Got dets")
     num = pnum[0]
-    if debug: print("got zeroth index of pnum")
     if nms:
         do_nms_sort(dets, num, meta.classes, nms)
-    if debug: print("did sort")
     res = []
-    if debug: print("about to range")
     for j in range(num):
-        if debug: print("Ranging on "+str(j)+" of "+str(num))
-        if debug: print("Classes: "+str(meta), meta.classes, meta.names)
         for i in range(meta.classes):
-            if debug: print("Class-ranging on "+str(i)+" of "+str(meta.classes)+"= "+str(dets[j].prob[i]))
             if dets[j].prob[i] > 0:
                 b = dets[j].bbox
                 if altNames is None:
                     nameTag = meta.names[i]
                 else:
                     nameTag = altNames[i]
-                if debug:
-                    print("Got bbox", b)
-                    print(nameTag)
-                    print(dets[j].prob[i])
-                    print((b.x, b.y, b.w, b.h))
                 res.append((nameTag, dets[j].prob[i], (b.x, b.y, b.w, b.h)))
-    if debug: print("did range")
     res = sorted(res, key=lambda x: -x[1])
-    if debug: print("did sort")
     if isPath:
         free_image(im)
-        if debug: print("freed image")
     free_detections(dets, num)
-    if debug: print("freed detections")
     return res
 
 
@@ -366,57 +346,62 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
 
     detections = detect(netMain, metaMain, imagePath, thresh)
     if showImage:
-        try:
-            from skimage import io, draw
-            import numpy as np
-            image = io.imread(imagePath)
-            print("*** "+str(len(detections))+" Results, color coded by confidence ***")
-            imcaption = []
-            for detection in detections:
-                label = detection[0]
-                confidence = detection[1]
-                pstring = label+": "+str(np.rint(100 * confidence))+"%"
-                imcaption.append(pstring)
-                print(pstring)
-                bounds = detection[2]
-                shape = image.shape
-                # x = shape[1]
-                # xExtent = int(x * bounds[2] / 100)
-                # y = shape[0]
-                # yExtent = int(y * bounds[3] / 100)
-                yExtent = int(bounds[3])
-                xEntent = int(bounds[2])
-                # Coordinates are around the center
-                xCoord = int(bounds[0] - bounds[2]/2)
-                yCoord = int(bounds[1] - bounds[3]/2)
-                boundingBox = [
-                    [xCoord, yCoord],
-                    [xCoord, yCoord + yExtent],
-                    [xCoord + xEntent, yCoord + yExtent],
-                    [xCoord + xEntent, yCoord]
-                ]
-                # Wiggle it around to make a 3px border
-                rr, cc = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
-                rr2, cc2 = draw.polygon_perimeter([x[1] + 1 for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
-                rr3, cc3 = draw.polygon_perimeter([x[1] - 1 for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
-                rr4, cc4 = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] + 1 for x in boundingBox], shape= shape)
-                rr5, cc5 = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] - 1 for x in boundingBox], shape= shape)
-                boxColor = (int(255 * (1 - (confidence ** 2))), int(255 * (confidence ** 2)), 0)
-                draw.set_color(image, (rr, cc), boxColor, alpha= 0.8)
-                draw.set_color(image, (rr2, cc2), boxColor, alpha= 0.8)
-                draw.set_color(image, (rr3, cc3), boxColor, alpha= 0.8)
-                draw.set_color(image, (rr4, cc4), boxColor, alpha= 0.8)
-                draw.set_color(image, (rr5, cc5), boxColor, alpha= 0.8)
-            if not makeImageOnly:
-                io.imshow(image)
-                io.show()
-            detections = {
-                "detections": detections,
-                "image": image,
-                "caption": "\n<br/>".join(imcaption)
-            }
-        except Exception as e:
-            print("Unable to show image: "+str(e))
+        detections = showImg(imagePath, detections, makeImageOnly)
+    return detections
+
+def showImg(imagePath, detections, makeImageOnly):
+    try:
+        from skimage import io, draw
+        import numpy as np
+        image = io.imread(imagePath)
+        print("*** "+str(len(detections))+" Results, color coded by confidence ***")
+        imcaption = []
+        for detection in detections:
+            label = detection[0]
+            confidence = detection[1]
+            pstring = label+": "+str(np.rint(100 * confidence))+"%"
+            imcaption.append(pstring)
+            print(pstring)
+            bounds = detection[2]
+            shape = image.shape
+            # x = shape[1]
+            # xExtent = int(x * bounds[2] / 100)
+            # y = shape[0]
+            # yExtent = int(y * bounds[3] / 100)
+            yExtent = int(bounds[3])
+            xEntent = int(bounds[2])
+            # Coordinates are around the center
+            xCoord = int(bounds[0] - bounds[2]/2)
+            yCoord = int(bounds[1] - bounds[3]/2)
+            boundingBox = [
+                [xCoord, yCoord],
+                [xCoord, yCoord + yExtent],
+                [xCoord + xEntent, yCoord + yExtent],
+                [xCoord + xEntent, yCoord]
+            ]
+            # Wiggle it around to make a 3px border
+            rr, cc = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
+            rr2, cc2 = draw.polygon_perimeter([x[1] + 1 for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
+            rr3, cc3 = draw.polygon_perimeter([x[1] - 1 for x in boundingBox], [x[0] for x in boundingBox], shape= shape)
+            rr4, cc4 = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] + 1 for x in boundingBox], shape= shape)
+            rr5, cc5 = draw.polygon_perimeter([x[1] for x in boundingBox], [x[0] - 1 for x in boundingBox], shape= shape)
+            boxColor = (int(255 * (1 - (confidence ** 2))), int(255 * (confidence ** 2)), 0)
+            draw.set_color(image, (rr, cc), boxColor, alpha= 0.8)
+            draw.set_color(image, (rr2, cc2), boxColor, alpha= 0.8)
+            draw.set_color(image, (rr3, cc3), boxColor, alpha= 0.8)
+            draw.set_color(image, (rr4, cc4), boxColor, alpha= 0.8)
+            draw.set_color(image, (rr5, cc5), boxColor, alpha= 0.8)
+        if not makeImageOnly:
+            io.imshow(image)
+            io.show()
+        detections = {
+            "detections": detections,
+            "image": image,
+            "caption": "\n<br/>".join(imcaption)
+        }
+    except Exception as e:
+        print("Unable to show image: "+str(e))
+
     return detections
 
 if __name__ == "__main__":
