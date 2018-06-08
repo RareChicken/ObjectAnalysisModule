@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b647b55f-74b0-4993-be16-e5722424e5fb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>main.py</StartupFile>
+    <StartupFile>main2.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -93,7 +93,7 @@
     <Content Include="yolo_cpp_dll.dll">
       <Publish>False</Publish>
     </Content>
-    <Content Include="yolo_cpp_dll_no_gpu.dll">
+    <Content Include="yolo_cpp_dll_nogpu.dll">
       <Publish>False</Publish>
     </Content>
   </ItemGroup>
@@ -105,6 +105,7 @@
     <Compile Include="main.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="main2.py" />
     <Compile Include="objanalyzer.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
