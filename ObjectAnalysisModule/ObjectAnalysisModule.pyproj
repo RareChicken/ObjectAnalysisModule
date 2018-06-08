@@ -85,6 +85,7 @@
     <Content Include="data\inet9k.map" />
     <Content Include="data\person.jpg" />
     <Content Include="data\scream.jpg" />
+    <Content Include="data\street.mp4" />
     <Content Include="data\voc.data" />
     <Content Include="data\voc.names" />
     <Content Include="pthreadGC2.dll" />

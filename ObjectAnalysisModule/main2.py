@@ -210,12 +210,15 @@ def classify(net, meta, im):
     res = sorted(res, key=lambda x: -x[1])
     return res
 
-def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45, debug= False):
+def detect(net, meta, image, isPath=True, thresh=.5, hier_thresh=.5, nms=.45, debug= False):
     """
     Performs the meat of the detection
     """
     #pylint: disable= C0321
-    im = load_image(image, 0, 0)
+    if isPath:
+        im = load_image(image.encode('ascii'), 0, 0)
+    else:
+        im, arr = array_to_image(image)
     #import cv2
     #custom_image = cv2.imread(image) # use: detect(,,imagePath,)
     #import scipy.misc
@@ -257,8 +260,9 @@ def detect(net, meta, image, thresh=.5, hier_thresh=.5, nms=.45, debug= False):
     if debug: print("did range")
     res = sorted(res, key=lambda x: -x[1])
     if debug: print("did sort")
-    free_image(im)
-    if debug: print("freed image")
+    if isPath:
+        free_image(im)
+        if debug: print("freed image")
     free_detections(dets, num)
     if debug: print("freed detections")
     return res
@@ -343,7 +347,24 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
     if not os.path.exists(imagePath):
         raise ValueError("Invalid image path `"+os.path.abspath(imagePath)+"`")
     # Do the detection
-    detections = detect(netMain, metaMain, imagePath.encode("ascii"), thresh)
+    import re
+    file_ext = re.findall('[^.][a-zA-Z0-9]+$', imagePath)[0]
+    if file_ext == 'avi' or file_ext == 'mp4' or file_ext == 'mjpg' or file_ext == 'mov':
+        import cv2
+
+        cap = cv2.VideoCapture(imagePath)
+
+        while (cap.isOpened()):
+            ret, frame = cap.read()
+            if ret:
+                #cv2.imshow('frame', frame)
+                #cv2.waitKey(1)
+                detections = detect(netMain, metaMain, frame, False, thresh)
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    detections = detect(netMain, metaMain, imagePath, thresh)
     if showImage:
         try:
             from skimage import io, draw
@@ -399,4 +420,4 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
     return detections
 
 if __name__ == "__main__":
-    print(performDetect())
+    print(performDetect('street.mp4'))
