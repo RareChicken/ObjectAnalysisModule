@@ -337,8 +337,8 @@ def performDetect(imagePath="data/dog.jpg", thresh= 0.25, configPath = "./cfg/yo
         while (cap.isOpened()):
             ret, frame = cap.read()
             if ret:
-                #cv2.imshow('frame', frame)
-                #cv2.waitKey(1)
+                cv2.imshow('frame', frame)
+                cv2.waitKey(1)
                 detections = detect(netMain, metaMain, frame, False, thresh)
 
         cap.release()
@@ -405,4 +405,4 @@ def showImg(imagePath, detections, makeImageOnly):
     return detections
 
 if __name__ == "__main__":
-    print(performDetect('street.mp4'))
+    print(performDetect('data/street.mp4'))
