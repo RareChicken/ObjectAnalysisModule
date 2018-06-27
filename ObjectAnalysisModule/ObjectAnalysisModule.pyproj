@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b647b55f-74b0-4993-be16-e5722424e5fb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>main2.py</StartupFile>
+    <StartupFile>demo.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,92 +22,38 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="cfg\alexnet.cfg" />
-    <Content Include="cfg\cifar.cfg" />
-    <Content Include="cfg\cifar.test.cfg" />
-    <Content Include="cfg\coco.data" />
-    <Content Include="cfg\combine9k.data" />
-    <Content Include="cfg\darknet.cfg" />
-    <Content Include="cfg\darknet19.cfg" />
-    <Content Include="cfg\darknet19_448.cfg" />
-    <Content Include="cfg\densenet201.cfg" />
-    <Content Include="cfg\extraction.cfg" />
-    <Content Include="cfg\extraction.conv.cfg" />
-    <Content Include="cfg\extraction22k.cfg" />
-    <Content Include="cfg\go.test.cfg" />
-    <Content Include="cfg\gru.cfg" />
-    <Content Include="cfg\imagenet1k.data" />
-    <Content Include="cfg\imagenet22k.dataset" />
-    <Content Include="cfg\imagenet9k.hierarchy.dataset" />
-    <Content Include="cfg\jnet-conv.cfg" />
-    <Content Include="cfg\msr_152.cfg" />
-    <Content Include="cfg\msr_34.cfg" />
-    <Content Include="cfg\msr_50.cfg" />
-    <Content Include="cfg\resnet152.cfg" />
-    <Content Include="cfg\resnet50.cfg" />
-    <Content Include="cfg\rnn.cfg" />
-    <Content Include="cfg\rnn.train.cfg" />
-    <Content Include="cfg\strided.cfg" />
-    <Content Include="cfg\t1.test.cfg" />
-    <Content Include="cfg\tiny-yolo-voc.cfg" />
-    <Content Include="cfg\tiny-yolo.cfg" />
-    <Content Include="cfg\tiny.cfg" />
-    <Content Include="cfg\vgg-16.cfg" />
-    <Content Include="cfg\vgg-conv.cfg" />
-    <Content Include="cfg\voc.data" />
-    <Content Include="cfg\writing.cfg" />
-    <Content Include="cfg\yolo-voc.2.0.cfg" />
-    <Content Include="cfg\yolo-voc.cfg" />
-    <Content Include="cfg\yolo.2.0.cfg" />
-    <Content Include="cfg\yolo.cfg" />
-    <Content Include="cfg\yolo9000.cfg" />
-    <Content Include="cfg\yolov2-tiny-voc.cfg" />
-    <Content Include="cfg\yolov2-tiny.cfg" />
-    <Content Include="cfg\yolov2-voc.cfg" />
-    <Content Include="cfg\yolov2.cfg" />
-    <Content Include="cfg\yolov3-tiny.cfg" />
-    <Content Include="cfg\yolov3-voc.cfg" />
-    <Content Include="cfg\yolov3.cfg" />
-    <Content Include="data\9k.labels" />
-    <Content Include="data\9k.names" />
-    <Content Include="data\9k.tree" />
-    <Content Include="data\coco.data" />
-    <Content Include="data\coco.names" />
-    <Content Include="data\coco9k.map" />
-    <Content Include="data\combine9k.data" />
-    <Content Include="data\dog.jpg" />
-    <Content Include="data\eagle.jpg" />
-    <Content Include="data\giraffe.jpg" />
-    <Content Include="data\goal.txt" />
-    <Content Include="data\horses.jpg" />
-    <Content Include="data\imagenet.labels.list" />
-    <Content Include="data\imagenet.shortnames.list" />
-    <Content Include="data\inet9k.map" />
-    <Content Include="data\person.jpg" />
-    <Content Include="data\scream.jpg" />
-    <Content Include="data\street.mp4" />
-    <Content Include="data\voc.data" />
-    <Content Include="data\voc.names" />
-    <Content Include="pthreadGC2.dll" />
-    <Content Include="pthreadVC2.dll" />
-    <Content Include="yolov3.weights" />
-    <Content Include="yolo_cpp_dll_gpu.dll">
-      <Publish>False</Publish>
-    </Content>
-    <Content Include="yolo_cpp_dll_nogpu.dll">
-      <Publish>False</Publish>
-    </Content>
+    <Content Include="detection.txt" />
+    <Content Include="model_data\coco_classes.txt" />
+    <Content Include="model_data\mars-small128.pb" />
+    <Content Include="model_data\voc_classes.txt" />
+    <Content Include="model_data\yolo_anchors.txt" />
+    <Content Include="yolov3.cfg" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="cfg\" />
-    <Folder Include="data\" />
+    <Folder Include="deep_sort\" />
+    <Folder Include="model_data\" />
+    <Folder Include="tools\" />
+    <Folder Include="yolo3\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="main.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="main2.py" />
-    <Compile Include="objanalyzer.py" />
+    <Compile Include="convert.py" />
+    <Compile Include="deep_sort\detection.py" />
+    <Compile Include="deep_sort\iou_matching.py" />
+    <Compile Include="deep_sort\kalman_filter.py" />
+    <Compile Include="deep_sort\linear_assignment.py" />
+    <Compile Include="deep_sort\nn_matching.py" />
+    <Compile Include="deep_sort\preprocessing.py" />
+    <Compile Include="deep_sort\track.py" />
+    <Compile Include="deep_sort\tracker.py" />
+    <Compile Include="deep_sort\__init__.py" />
+    <Compile Include="demo.py" />
+    <Compile Include="tools\freeze_model.py" />
+    <Compile Include="tools\generate_detections.py" />
+    <Compile Include="tools\__init__.py" />
+    <Compile Include="yolo.py" />
+    <Compile Include="yolo3\model.py" />
+    <Compile Include="yolo3\utils.py" />
+    <Compile Include="yolo3\__init__.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
