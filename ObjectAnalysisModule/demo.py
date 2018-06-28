@@ -92,7 +92,7 @@ def main(yolo):
                 classes, boxs = yolo.detect_image(Image.fromarray(image_trim))
                 features = encoder(image_trim, boxs)
                 trim_detections = [Detection(clazz, bbox, 1.0, feature) for clazz, bbox, feature in zip(classes, boxs, features)]
-                if trim_detections > 0:
+                if trim_detections.count > 0:
                     trim_detection = max(trim_detections, key=lambda d: d.tlwh[2] + d.tlwh[3])
                     cv2.imwrite(os.path.join('detections', trim_detection.clazz + '_' + str(track.track_id) + '.jpg'), image_trim)
 
