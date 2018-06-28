@@ -62,12 +62,12 @@ def main(yolo):
         t1 = time.time()
 
         image = Image.fromarray(frame)
-        boxs = yolo.detect_image(image)
+        classes, boxs = yolo.detect_image(image)
        # print("box_num",len(boxs))
         features = encoder(frame,boxs)
         
         # score to 1.0 here).
-        detections = [Detection(bbox, 1.0, feature) for bbox, feature in zip(boxs, features)]
+        detections = [Detection(clazz, bbox, 1.0, feature) for clazz, bbox, feature in zip(classes, boxs, features)]
         
         # Run non-maxima suppression.
         boxes = np.array([d.tlwh for d in detections])
@@ -84,7 +84,7 @@ def main(yolo):
                 continue
             bbox = track.to_tlbr()
             cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255,255,255), 2)
-            cv2.putText(frame, str(track.track_id),(int(bbox[0]), int(bbox[1])),0, 5e-3 * 200, (0,255,0),2)
+            cv2.putText(frame, str(track.track_id), (int(bbox[0]), int(bbox[1])), 0, 5e-3 * 200, (0,255,0), 2)
             # 새롭게 아이디가 부여된 객체 사진 일단 저장
             if track.track_id > last_id:
                 image_trim = original_frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
@@ -94,8 +94,8 @@ def main(yolo):
 
         for det in detections:
             bbox = det.to_tlbr()
-            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])),(255,0,0), 2)
-
+            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255,0,0), 2)
+            cv2.putText(frame, det.clazz, (int(bbox[0]), int(bbox[1])), 0, 5e-3 * 200, (0,0,255), 2)
             
         cv2.imshow('', frame)
         

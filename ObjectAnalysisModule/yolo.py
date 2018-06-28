@@ -94,6 +94,7 @@ class YOLO(object):
                 self.input_image_shape: [image.size[1], image.size[0]],
                 K.learning_phase(): 0
             })
+        return_classes = []
         return_boxs = []
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
@@ -111,9 +112,10 @@ class YOLO(object):
             if y < 0 :
                 h = h + y
                 y = 0 
+            return_classes.append(predicted_class)
             return_boxs.append([x,y,w,h])
 
-        return return_boxs
+        return return_classes, return_boxs
 
     def close_session(self):
         self.sess.close()
