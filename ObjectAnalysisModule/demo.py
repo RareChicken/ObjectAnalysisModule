@@ -88,7 +88,13 @@ def main(yolo):
             # 새롭게 아이디가 부여된 객체 사진 일단 저장
             if track.track_id > last_id:
                 image_trim = original_frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
-                cv2.imwrite(os.path.join('detections', 'id_' + str(track.track_id) + '.jpg'), image_trim)
+                # 비효율적이지만 트래킹된 박스의 클래스를 알아내기 위해 다시 디텍딩 시도
+                classes, boxs = yolo.detect_image(Image.fromarray(image_trim))
+                features = encoder(image_trim, boxs)
+                trim_detections = [Detection(clazz, bbox, 1.0, feature) for clazz, bbox, feature in zip(classes, boxs, features)]
+                if trim_detections > 0:
+                    trim_detection = max(trim_detections, key=lambda d: d.tlwh[2] + d.tlwh[3])
+                    cv2.imwrite(os.path.join('detections', trim_detection.clazz + '_' + str(track.track_id) + '.jpg'), image_trim)
 
         last_id = tracker._next_id - 1;
 
