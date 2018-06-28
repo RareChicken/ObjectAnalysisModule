@@ -4,6 +4,7 @@
 from __future__ import division, print_function, absolute_import
 
 import os
+import shutil
 from timeit import time
 import warnings
 import sys
@@ -45,11 +46,16 @@ def main(yolo):
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
         out = cv2.VideoWriter('output.avi', fourcc, 15, (w, h))
         list_file = open('detection.txt', 'w')
-        frame_index = -1 
+        frame_index = -1
+
+    if os.path.exists('detections'):
+        shutil.rmtree('detections')
+    os.mkdir('detections')
         
     last_id = 0;
     fps = 0.0
     while True:
+        ret, original_frame = video_capture.read()
         ret, frame = video_capture.read()  # frame shape 640*480*3
         if ret != True:
             break;
@@ -76,22 +82,19 @@ def main(yolo):
         for track in tracker.tracks:
             if track.is_confirmed() and track.time_since_update >1 :
                 continue
+            bbox = track.to_tlbr()
+            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255,255,255), 2)
+            cv2.putText(frame, str(track.track_id),(int(bbox[0]), int(bbox[1])),0, 5e-3 * 200, (0,255,0),2)
             # 새롭게 아이디가 부여된 객체 사진 일단 저장
             if track.track_id > last_id:
-                bbox = track.to_tlwh()
-                image_trim = frame[int(bbox[1]):int(bbox[1])+int(bbox[3]), int(bbox[0]):int(bbox[0])+int(bbox[2])]
-                if not os.path.exists('detections'):
-                    os.mkdir('detections')
+                image_trim = original_frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
                 cv2.imwrite(os.path.join('detections', 'id_' + str(track.track_id) + '.jpg'), image_trim)
-            bbox = track.to_tlbr()
-            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])),(255,255,255), 2)
-            cv2.putText(frame, str(track.track_id),(int(bbox[0]), int(bbox[1])),0, 5e-3 * 200, (0,255,0),2)
 
         last_id = tracker._next_id - 1;
 
         for det in detections:
             bbox = det.to_tlbr()
-            cv2.rectangle(frame,(int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])),(255,0,0), 2)
+            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])),(255,0,0), 2)
 
             
         cv2.imshow('', frame)
