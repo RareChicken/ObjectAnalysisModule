@@ -48,7 +48,6 @@ def main(yolo):
         frame_index = -1 
         
     last_id = 0;
-
     fps = 0.0
     while True:
         ret, frame = video_capture.read()  # frame shape 640*480*3
