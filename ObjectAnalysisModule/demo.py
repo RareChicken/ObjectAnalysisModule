@@ -35,7 +35,7 @@ def main(yolo):
     metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
     tracker = Tracker(metric)
 
-    writeVideo_flag = True 
+    writeVideo_flag = False
     
     video_capture = cv2.VideoCapture('data/test.mp4')
 
@@ -50,15 +50,13 @@ def main(yolo):
 
     if os.path.exists('detections'):
         shutil.rmtree('detections')
-    try:
-        original_umask = os.umask(0)
-        os.mkdir('detections')
-    finally:
-        os.umask(original_umask)
+    # 이 파일을 참조하고 있는 경우 Permission 에러 발생
+    os.mkdir('detections')
         
     last_id = 0;
     fps = 0.0
     while True:
+        # 
         ret, original_frame = video_capture.read()
         ret, frame = video_capture.read()  # frame shape 640*480*3
         if ret != True:

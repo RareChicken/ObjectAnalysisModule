@@ -4,9 +4,6 @@
 # detection txt
 detection.txt
 
-# test videos
-**/data
-
 # detection pictures
 **/detections
 
