@@ -37,7 +37,7 @@ def main(yolo):
 
     writeVideo_flag = True 
     
-    video_capture = cv2.VideoCapture(0)
+    video_capture = cv2.VideoCapture('data/test.mp4')
 
     if writeVideo_flag:
     # Define the codec and create VideoWriter object
@@ -50,7 +50,11 @@ def main(yolo):
 
     if os.path.exists('detections'):
         shutil.rmtree('detections')
-    os.mkdir('detections')
+    try:
+        original_umask = os.umask(0)
+        os.mkdir('detections')
+    finally:
+        os.umask(original_umask)
         
     last_id = 0;
     fps = 0.0
@@ -92,7 +96,7 @@ def main(yolo):
                 classes, boxs = yolo.detect_image(Image.fromarray(image_trim))
                 features = encoder(image_trim, boxs)
                 trim_detections = [Detection(clazz, bbox, 1.0, feature) for clazz, bbox, feature in zip(classes, boxs, features)]
-                if trim_detections.count > 0:
+                if len(trim_detections) > 0:
                     trim_detection = max(trim_detections, key=lambda d: d.tlwh[2] + d.tlwh[3])
                     cv2.imwrite(os.path.join('detections', trim_detection.clazz + '_' + str(track.track_id) + '.jpg'), image_trim)
 
