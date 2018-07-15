@@ -22,14 +22,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="detection.txt" />
+    <Content Include="cfg\yolov3.cfg" />
     <Content Include="model_data\coco_classes.txt" />
     <Content Include="model_data\mars-small128.pb" />
     <Content Include="model_data\voc_classes.txt" />
     <Content Include="model_data\yolo_anchors.txt" />
-    <Content Include="yolov3.cfg" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="cfg\" />
     <Folder Include="deep_sort\" />
     <Folder Include="model_data\" />
     <Folder Include="tools\" />
@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="convert.py" />
+    <Compile Include="darknet_yolo.py" />
     <Compile Include="deep_sort\detection.py" />
     <Compile Include="deep_sort\iou_matching.py" />
     <Compile Include="deep_sort\kalman_filter.py" />

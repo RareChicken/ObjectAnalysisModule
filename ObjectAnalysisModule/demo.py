@@ -12,6 +12,8 @@ import cv2
 import numpy as np
 from PIL import Image
 from yolo import YOLO
+# from darknet_yolo import YOLO
+# from darknet_yolo import array_to_image
 
 from deep_sort import preprocessing
 from deep_sort import nn_matching
@@ -56,7 +58,6 @@ def main(yolo):
     last_id = 0;
     fps = 0.0
     while True:
-        # 
         ret, original_frame = video_capture.read()
         ret, frame = video_capture.read()  # frame shape 640*480*3
         if ret != True:
@@ -64,12 +65,15 @@ def main(yolo):
         t1 = time.time()
 
         image = Image.fromarray(frame)
-        classes, boxs = yolo.detect_image(image)
-       # print("box_num",len(boxs))
-        features = encoder(frame,boxs)
+        # image, arr = array_to_image(frame)
+        dets = yolo.detect_image(image)
+
+        # print("box_num",len(boxs))
+        boxes = [det[1] for det in dets]
+        features = encoder(frame, boxes)
         
         # score to 1.0 here).
-        detections = [Detection(clazz, bbox, 1.0, feature) for clazz, bbox, feature in zip(classes, boxs, features)]
+        detections = [Detection(det[0], det[1], 1.0, feature) for det, feature in zip(dets, features)]
         
         # Run non-maxima suppression.
         boxes = np.array([d.tlwh for d in detections])
@@ -106,9 +110,9 @@ def main(yolo):
             out.write(frame)
             frame_index = frame_index + 1
             list_file.write(str(frame_index)+' ')
-            if len(boxs) != 0:
-                for i in range(0,len(boxs)):
-                    list_file.write(str(boxs[i][0]) + ' '+str(boxs[i][1]) + ' '+str(boxs[i][2]) + ' '+str(boxs[i][3]) + ' ')
+            if len(boxes) != 0:
+                for i in range(0,len(boxes)):
+                    list_file.write(str(boxes[i][0]) + ' '+str(boxes[i][1]) + ' '+str(boxes[i][2]) + ' '+str(boxes[i][3]) + ' ')
             list_file.write('\n')
             
         fps  = ( fps + (1./(time.time()-t1)) ) / 2
