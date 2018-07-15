@@ -85,19 +85,27 @@ def main(yolo):
             if track.is_confirmed() and track.time_since_update >1 :
                 continue
             bbox = track.to_tlbr()
-            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255,255,255), 2)
-            cv2.putText(frame, str(track.track_id), (int(bbox[0]), int(bbox[1])), 0, 5e-3 * 200, (0,255,0), 2)
+            x = int(bbox[0])
+            y = int(bbox[1])
+            w = int(bbox[2])
+            h = int(bbox[3])
+            cv2.rectangle(frame, (x, y), (w, h), (255,255,255), 2)
+            cv2.putText(frame, str(track.track_id), (x, y), 0, 5e-3 * 200, (0,255,0), 2)
             # 새롭게 아이디가 부여된 객체 사진 일단 저장
             if track.track_id > last_id:
-                image_trim = original_frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2])]
+                image_trim = original_frame[y:h, x:w]
                 cv2.imwrite(os.path.join('detections', track.clazz + '_' + str(track.track_id) + '.jpg'), image_trim)
 
         last_id = tracker._next_id - 1;
 
         for det in detections:
             bbox = det.to_tlbr()
-            cv2.rectangle(frame, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), (255,0,0), 2)
-            cv2.putText(frame, det.clazz, (int(bbox[0]), int(bbox[1])), 0, 5e-3 * 200, (0,0,255), 2)
+            x = int(bbox[0])
+            y = int(bbox[1])
+            w = int(bbox[2])
+            h = int(bbox[3])
+            cv2.rectangle(frame, (x, y), (w, h), (255,0,0), 2)
+            cv2.putText(frame, det.clazz, (x, y), 0, 5e-3 * 200, (0,0,255), 2)
             
         cv2.imshow('', frame)
         
