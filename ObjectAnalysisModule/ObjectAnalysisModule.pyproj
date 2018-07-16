@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>b647b55f-74b0-4993-be16-e5722424e5fb</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>demo.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -47,7 +47,7 @@
     <Compile Include="deep_sort\track.py" />
     <Compile Include="deep_sort\tracker.py" />
     <Compile Include="deep_sort\__init__.py" />
-    <Compile Include="demo.py" />
+    <Compile Include="main.py" />
     <Compile Include="tools\freeze_model.py" />
     <Compile Include="tools\generate_detections.py" />
     <Compile Include="tools\__init__.py" />

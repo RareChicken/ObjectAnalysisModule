@@ -3,15 +3,9 @@
 
 # Quick Start
 
-1. Download YOLOv3 weights from [YOLO website](http://pjreddie.com/darknet/yolo/).
-2. Convert the Darknet YOLO model to a Keras model.
-3. Run YOLO_DEEP_SORT 
-
-```
-   wget https://pjreddie.com/media/files/yolov3.weights
-   python convert.py yolov3.cfg yolov3.weights model_data/yolo.h5
-   python demo.py
-```
+1. YOLOv3 weights 파일을 여기서 다운. [YOLO website](http://pjreddie.com/darknet/yolo/).
+2. model_data 폴더 내부에 YOLOv3 weights 파일 주입.
+3. ObjectAnalysisModule.sln 열어서 실행.
 
 # Dependencies
 
@@ -20,5 +14,3 @@ The code is compatible with Python 2.7 and 3. The following dependencies are nee
     NumPy
     sklean
     OpenCV
-
-Additionally, feature generation requires TensorFlow-1.4.0.
