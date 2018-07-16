@@ -11,9 +11,9 @@ import sys
 import cv2
 import numpy as np
 from PIL import Image
-from yolo import YOLO
-# from darknet_yolo import YOLO
-# from darknet_yolo import array_to_image
+# from yolo import YOLO
+from darknet_yolo import YOLO
+from darknet_yolo import array_to_image
 
 from deep_sort import preprocessing
 from deep_sort import nn_matching
@@ -64,8 +64,8 @@ def main(yolo):
             break;
         t1 = time.time()
 
-        image = Image.fromarray(frame)
-        # image, arr = array_to_image(frame)
+        # image = Image.fromarray(frame)
+        image, arr = array_to_image(frame)
         dets = yolo.detect_image(image)
 
         # print("box_num",len(boxs))

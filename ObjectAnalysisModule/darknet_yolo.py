@@ -46,7 +46,7 @@ class METADATA(Structure):
 hasGPU = True
 if os.name == "nt":
     winGPUdll = "yolo_cpp_dll.dll"
-    winNoGPUdll = "yolo_cpp_dll_no_gpu.dll"
+    winNoGPUdll = "yolo_cpp_dll_nogpu.dll"
     envKeys = list()
     for k, v in os.environ.items():
         envKeys.append(k)
@@ -173,9 +173,9 @@ class YOLO():
         self.thresh = thresh
         self.hier_thresh = hier_thresh
         self.nms = nms
-        self.config_path = "cfg/yolov3.cfg"
-        self.weight_path = "model_data/yolov3.weights"
-        self.meta_path = "data/coco.data"
+        self.config_path = "cfg/yolo-obj.cfg"
+        self.weight_path = "model_data/yolo-obj.weights"
+        self.meta_path = "data/obj.data"
         self.net_main = load_net(self.config_path.encode("ascii"), self.weight_path.encode("ascii"), 0)
         self.meta_main = load_meta(self.meta_path.encode("ascii"))
         self.alt_names = None
@@ -217,8 +217,7 @@ class YOLO():
                         name_tag = self.alt_names[i]
                     x = bbox.x - bbox.w / 2
                     y = bbox.y - bbox.h / 2
-                    h = bbox.h * 2
-                    result.append((name_tag, (x, y, bbox.w, h)))
+                    result.append((name_tag, (x, y, bbox.w, bbox.h)))
         # result = sorted(result, key=lambda x: -x[1])
         # free_image(im)
         free_detections(dets, num)
