@@ -215,6 +215,8 @@ class YOLO():
                         name_tag = self.meta_main.names[i]
                     else:
                         name_tag = self.alt_names[i]
+                    if name_tag != 'person' and name_tag != 'car':
+                        continue
                     x = bbox.x - bbox.w / 2
                     y = bbox.y - bbox.h / 2
                     result.append((name_tag, (x, y, bbox.w, bbox.h)))
