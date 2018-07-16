@@ -168,6 +168,10 @@ def array_to_image(arr):
     im = IMAGE(w,h,c,data)
     return im, arr
 
+class ObjFlag(enum.Enum):
+    PERSON = 1 << 0
+    CAR = 1 << 1
+
 class YOLO():
     def __init__(self, thresh=.25, hier_thresh=.5, nms=.45):
         self.thresh = thresh
@@ -198,7 +202,7 @@ class YOLO():
         except Exception:
             pass
 
-    def detect_image(self, image):
+    def detect_image(self, image, flag):
         num = c_int(0)
         pnum = pointer(num)
         predict_image(self.net_main, image)
@@ -215,7 +219,7 @@ class YOLO():
                         name_tag = self.meta_main.names[i]
                     else:
                         name_tag = self.alt_names[i]
-                    if name_tag != 'person' and name_tag != 'car':
+                    if not flag & ObjFlag.PERSON or name_tag != 'person' or not flag & ObjFlag.CAR or name_tag != 'car':
                         continue
                     x = bbox.x - bbox.w / 2
                     y = bbox.y - bbox.h / 2
