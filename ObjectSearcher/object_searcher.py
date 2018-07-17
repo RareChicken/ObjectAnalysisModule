@@ -21,20 +21,13 @@ from deep_sort.detection import Detection as ddet
 warnings.filterwarnings('ignore')
 
 class ObjectSearcher:
-    def __init__(self):
+    def __init__(self, yolo):
         self.nms_max_overlap = 1.0
 
         model_filename = 'model_data/mars-small128.pb'
         self.encoder = gdet.create_box_encoder(model_filename, batch_size=1)
 
-        self.yolo = YOLO()
-
-    def _getTracker(self):
-        max_cosine_distance = 0.3
-        nn_budget = None
-
-        metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-        return Tracker(metric)
+        self.yolo = yolo
 
     def search(self, video_path, flag= 0):
         result = []
@@ -44,7 +37,11 @@ class ObjectSearcher:
 
         video_capture = cv2.VideoCapture(video_path)
 
-        tracker = _getTracker()
+        max_cosine_distance = 0.3
+        nn_budget = None
+
+        metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
+        tracker = Tracker(metric)
 
         # Define the codec and create VideoWriter object
         w = int(video_capture.get(3))
@@ -61,6 +58,7 @@ class ObjectSearcher:
             frame_index = frame_index + 1
             if ret != True:
                 break
+            t1 = time.time()
 
             # image = Image.fromarray(frame)
             image, arr = array_to_image(frame)
@@ -97,10 +95,10 @@ class ObjectSearcher:
                 if track.track_id > last_id:
                     image_trim = original_frame[y:h, x:w]
                     result.append({
-                        id: track.track_id,
-                        tag: track.clazz,
-                        image: image_trim,
-                        frame_idx: frame_index + 1
+                        'id': track.track_id,
+                        'tag': track.clazz,
+                        'image': image_trim,
+                        'frame_idx': frame_index + 1
                     })
 
             last_id = tracker._next_id - 1;
@@ -114,13 +112,11 @@ class ObjectSearcher:
                 cv2.rectangle(frame, (x, y), (w, h), (255,0,0), 2)
                 cv2.putText(frame, det.clazz, (x, y), 0, 5e-3 * 200, (0,0,255), 2)
 
+            fps  = ( fps + (1./(time.time()-t1)) ) / 2
+            print("fps= %f"%(fps))
+
             # save a frame
             out.write(frame)
-            list_file.write(str(frame_index)+' ')
-            if len(boxes) != 0:
-                for i in range(0,len(boxes)):
-                    list_file.write(str(boxes[i][0])+' '+str(boxes[i][1])+ ' '+str(boxes[i][2])+' '+str(boxes[i][3])+' ')
-            list_file.write('\n')
 
         video_capture.release()
         out.release()

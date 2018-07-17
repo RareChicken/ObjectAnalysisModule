@@ -32,7 +32,6 @@
     <Folder Include="cfg\" />
     <Folder Include="deep_sort\" />
     <Folder Include="model_data\" />
-    <Folder Include="tools\" />
     <Folder Include="yolo3\" />
   </ItemGroup>
   <ItemGroup>
@@ -51,9 +50,6 @@
     <Compile Include="object_searcher.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="tools\freeze_model.py" />
-    <Compile Include="tools\generate_detections.py" />
-    <Compile Include="tools\__init__.py" />
     <Compile Include="yolo.py" />
     <Compile Include="yolo3\model.py" />
     <Compile Include="yolo3\utils.py" />

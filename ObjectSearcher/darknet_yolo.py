@@ -178,9 +178,9 @@ class YOLO():
         self.thresh = thresh
         self.hier_thresh = hier_thresh
         self.nms = nms
-        self.config_path = "cfg/yolo-obj.cfg"
-        self.weight_path = "model_data/yolo-obj.weights"
-        self.meta_path = "data/obj.data"
+        self.config_path = "cfg/yolov3.cfg"
+        self.weight_path = "model_data/yolov3.weights"
+        self.meta_path = "data/coco.data"
         self.net_main = load_net(self.config_path.encode("ascii"), self.weight_path.encode("ascii"), 0)
         self.meta_main = load_meta(self.meta_path.encode("ascii"))
         self.alt_names = None
@@ -220,7 +220,11 @@ class YOLO():
                         name_tag = self.meta_main.names[i]
                     else:
                         name_tag = self.alt_names[i]
-                    if not flag & ObjFlag.PERSON or name_tag != 'person' or not flag & ObjFlag.CAR or name_tag != 'car':
+                    if name_tag != 'person' and name_tag != 'car':
+                        continue
+                    if name_tag == 'person' and not flag & ObjFlag.PERSON.value:
+                        continue
+                    if name_tag == 'car' and not flag & ObjFlag.CAR.value:
                         continue
                     x = bbox.x - bbox.w / 2
                     y = bbox.y - bbox.h / 2
